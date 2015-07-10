@@ -300,7 +300,7 @@ plot.varSelRF <- function(x, nvar = NULL, which = c(1, 2), ...) {
       plot(x$selec.history$Number.Variables,
           x$selec.history$OOB, type = "b",
           xlab = "Number of variables used",
-          ylab = "OOB error", log = "x",
+          ylab = "Error", log = "x",
           ylim = ylim,
           ...)
       
