@@ -5,6 +5,11 @@
 
 
 varSelRF <- function(xdata, Class,
+                     error=function(rf){
+                       ooo <- rf$confusion[, -dim(rf$confusion)[2]]
+                       s.ooo <- sum(ooo)
+                       diag(ooo) <- 0
+                       sum(ooo)/s.ooo},
                      c.sd = 1,
                      mtryFactor = 1,
                      ntree = 5000,
@@ -33,15 +38,6 @@ varSelRF <- function(xdata, Class,
     ##oversize the vectors; will prune later.
     n.vars <- vars <- OOB.rf <- OOB.sd <- rep(NA, max.num.steps)
 
-    oobError <- function(rf) { ## should not be exported in the namespace.
-        ## The out of bag error
-        ooo <- rf$confusion[, -dim(rf$confusion)[2]]
-        s.ooo <- sum(ooo)
-        diag(ooo) <- 0
-        sum(ooo)/s.ooo
-    }
-
-    
     if(!is.null(fitted.rf)) {
         if(ncol(fitted.rf$importance) < 2)
             stop("The fitted rf was not fitted with importance = TRUE")
@@ -67,7 +63,7 @@ varSelRF <- function(xdata, Class,
         FirstForest <- rf
     else
         FirstForest <- NULL
-    m.iterated.ob.error <- m.initial.ob.error <- oobError(rf)
+    m.iterated.ob.error <- m.initial.ob.error <- error(rf)
     sd.iterated.ob.error <- sd.initial.ob.error <-
         sqrt(m.iterated.ob.error * (1 - m.iterated.ob.error) *
              (1/num.subjects))
@@ -172,7 +168,7 @@ varSelRF <- function(xdata, Class,
                                ntree = ntreeIterat, mtry = mtry,
                                keep.forest = keep.forest)
         
-        m.iterated.ob.error <- oobError(rf)
+        m.iterated.ob.error <- error(rf)
         sd.iterated.ob.error <-
             sqrt(m.iterated.ob.error * (1 - m.iterated.ob.error) *
                  (1/num.subjects))
@@ -1600,7 +1596,7 @@ tableSummary.varSelRFBoot <- function(object, name){
     
 ## #    rf <- randomForest(x = xdata, y = Class, importance= TRUE,
 ## #                       ntree = ntree, keep.forest = FALSE)
-##     m.iterated.ob.error <- m.initial.ob.error <- oobError(rf)
+##     m.iterated.ob.error <- m.initial.ob.error <- error(rf)
 ##     sd.iterated.ob.error <- sd.initial.ob.error <-
 ##         sqrt(m.iterated.ob.error * (1 - m.iterated.ob.error) * (1/num.subjects))
 
@@ -1689,7 +1685,7 @@ tableSummary.varSelRFBoot <- function(object, name){
 ##             rf <- randomForest(x = xdata[, selected.vars], y = Class, importance= FALSE,
 ##                                ntree = ntree, mtry = mtry, keep.forest = FALSE)
         
-##         m.iterated.ob.error <- oobError(rf)
+##         m.iterated.ob.error <- error(rf)
 ##         sd.iterated.ob.error <-
 ##             sqrt(m.iterated.ob.error * (1 - m.iterated.ob.error) * (1/num.subjects))
         

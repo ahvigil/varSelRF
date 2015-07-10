@@ -3,13 +3,19 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Variable selection from random forests using OOB error}
 \description{
-  Using the OOB error as minimization criterion, carry out variable
+  Using an error metric (OOB by default) as minimization criterion, carry out variable
   elimination from
   random forest, by successively eliminating the least important
   variables (with importance as returned from random forest).
 }
 \usage{
-varSelRF(xdata, Class, c.sd = 1, mtryFactor = 1, ntree = 5000,
+varSelRF(xdata, Class, 
+        error=function(rf){
+                       ooo <- rf$confusion[, -dim(rf$confusion)[2]]
+                       s.ooo <- sum(ooo)
+                       diag(ooo) <- 0
+                       sum(ooo)/s.ooo},
+         c.sd = 1, mtryFactor = 1, ntree = 5000,
          ntreeIterat = 2000, vars.drop.num = NULL, vars.drop.frac = 0.2,
          whole.range = TRUE, recompute.var.imp = FALSE, verbose = FALSE,
          returnFirstForest = TRUE, fitted.rf = NULL, keep.forest = FALSE)
@@ -19,6 +25,8 @@ varSelRF(xdata, Class, c.sd = 1, mtryFactor = 1, ntree = 5000,
   \item{xdata}{A data frame or matrix, with subjects/cases in rows and
     variables in columns. NAs not allowed.}
   \item{Class}{The dependent variable; must be a factor.}
+  \item{error}{The error metric; should be a function that takes a randomForest
+  object as its only argument and returns the error measure for that forest}
   \item{c.sd}{The factor that multiplies the sd. to decide on stopping
     the tierations or choosing the final solution. See reference for details.}
   \item{mtryFactor}{The multiplication factor of
